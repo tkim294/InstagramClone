@@ -1,55 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FlatList } from "react-native";
+import { API, graphqlOperation } from "aws-amplify";
 
 import Post from "../Post";
 import Stories from "../UserStoriesPreview";
-
-const data = [
-  {
-    id: "1",
-    user: {
-      imageUri:
-        "https://resources.premierleague.com/photos/2020/09/07/67039a6c-3a5d-4e66-ba9c-fe5cfcd1db1d/GettyImages-1267679968.jpg?width=860&height=573",
-      name: "Son Heung Min",
-    },
-    imageUri:
-      "https://i.insider.com/5d03aa8e6fc9201bc7002b43?width=1136&format=jpeg",
-    caption: "Beautiful city #instagram",
-    likesCount: 1457,
-    postedAt: "6 minutes ago",
-  },
-  {
-    id: "2",
-    user: {
-      imageUri:
-        "https://resources.premierleague.com/photos/2020/09/07/67039a6c-3a5d-4e66-ba9c-fe5cfcd1db1d/GettyImages-1267679968.jpg?width=860&height=573",
-      name: "Son Heung Min",
-    },
-    imageUri:
-      "https://i.insider.com/5d03aa8e6fc9201bc7002b43?width=1136&format=jpeg",
-    caption: "Beautiful city #instagram",
-    likesCount: 1457,
-    postedAt: "6 minutes ago",
-  },
-  {
-    id: "3",
-    user: {
-      imageUri:
-        "https://resources.premierleague.com/photos/2020/09/07/67039a6c-3a5d-4e66-ba9c-fe5cfcd1db1d/GettyImages-1267679968.jpg?width=860&height=573",
-      name: "Son Heung Min",
-    },
-    imageUri:
-      "https://i.insider.com/5d03aa8e6fc9201bc7002b43?width=1136&format=jpeg",
-    caption: "Beautiful city #instagram",
-    likesCount: 1457,
-    postedAt: "6 minutes ago",
-  },
-];
+import { listPosts } from "../../graphql/queries";
 
 const Feed = () => {
+  const [posts, setPosts] = useState([]);
+
+  const fetchPost = async () => {
+    try {
+      const postsData = await API.graphql(graphqlOperation(listPosts));
+      setPosts(postsData.data.listPosts.items);
+    } catch (err) {
+      console.log(err.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchPost();
+  }, []);
+
   return (
     <FlatList
-      data={data}
+      data={posts}
       renderItem={({ item }) => <Post post={item} />}
       keyExtractor={({ id }) => id}
       ListHeaderComponent={Stories}
